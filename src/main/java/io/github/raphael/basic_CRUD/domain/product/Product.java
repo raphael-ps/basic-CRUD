@@ -17,10 +17,14 @@ public class Product {
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String name;
-    private int price_in_cents;
+    private Integer price_in_cents;
+    private Integer amount;
+    private Boolean active;
 
     public Product(RequestProductPostDTO product){
         this.name = product.name();
         this.price_in_cents = product.price_in_cents();
+        this.active = true;
+        this.amount = product.amount();
     }
 }

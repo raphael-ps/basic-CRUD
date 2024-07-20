@@ -9,5 +9,10 @@ public record RequestProductPostDTO(
         String name,
 
         @NotNull
-        Integer price_in_cents) {
+        Integer price_in_cents,
+
+        @NotNull
+        Integer amount
+
+        ) {
 }

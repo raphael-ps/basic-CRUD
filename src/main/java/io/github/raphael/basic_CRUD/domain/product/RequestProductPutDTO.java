@@ -13,6 +13,9 @@ public record RequestProductPutDTO(
         String name,
 
         @NotNull
-        Integer price_in_cents
+        Integer price_in_cents,
+
+        @NotNull
+        Integer amount
 ) {
 }

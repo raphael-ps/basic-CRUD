@@ -5,6 +5,7 @@ import io.github.raphael.basic_CRUD.domain.product.Product;
 import io.github.raphael.basic_CRUD.domain.product.ProductRepository;
 import io.github.raphael.basic_CRUD.domain.product.RequestProductPostDTO;
 import io.github.raphael.basic_CRUD.domain.product.RequestProductPutDTO;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> allProducts = productRepository.findAll();
+        List<Product> allProducts = productRepository.findAllByActiveTrue();
         return ResponseEntity.ok(allProducts);
     }
 
@@ -45,13 +46,13 @@ public class ProductController {
         Optional<Product> optionalProduct = productRepository.findById(newProduct.id());
 
         if (optionalProduct.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw new EntityNotFoundException();
 
         } else {
             Product product = optionalProduct.get();
             product.setName(newProduct.name());
             product.setPrice_in_cents(newProduct.price_in_cents());
-
+            product.setAmount(newProduct.amount());
             return ResponseEntity.ok().build();
         }
     }
@@ -59,15 +60,20 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable String id) {
         Optional<Product> optionalProduct = productRepository.findById(id);
-        return optionalProduct.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return optionalProduct.map(ResponseEntity::ok).orElseThrow();
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<String> deleteProductById(@PathVariable String id){
-        if (!productRepository.existsById(id)){
-            return ResponseEntity.notFound().build();
+        Optional<Product> optionalProduct = productRepository.findById(id);
+
+        if (optionalProduct.isPresent()){
+            Product product = optionalProduct.get();
+            product.setActive(false);
+            return ResponseEntity.noContent().build();
         }
-        productRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+
+        throw new EntityNotFoundException();
     }
 }
